@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.15",
-    "sirv-cli": "^0.4.4"
+    "sirv-cli": "^0.4.4",
+    "three": "^0.114.0"
   }
 }

@@ -1,8 +1,74 @@
 <script>
-	import {total, recovered, dead, actual} from "./store";
+	import {onMount, onDestroy} from 'svelte';
+	import _ from 'lodash';
+	import * as three from 'three';
+	import {total, recovered, dead, actual} from "./stores/data.store";
+	import {windowSize} from './stores/common.store';
+	import {renderer, composer, camera, triggerGlitch, uniforms} from './gl';
+
+	let mainNode;
+
+	const windowSizeUnsub = windowSize.subscribe(([width, height]) => {
+		camera.aspect = width / height;
+		camera.updateProjectionMatrix();
+		renderer.setSize(width, height);
+	});
+	const actualUnsub = actual.subscribe(value => {
+		if (value) {
+			triggerGlitch();
+		}
+	});
+
+	let requestAnimationFrameID = null; 
+
+	onMount(() => {
+		mainNode.appendChild(renderer.domElement);
+		
+		const genMoveParams = (prevSign = {x: -1, y: -1}) => {
+			const axis = Math.random() > 0.5 ? 'x' : 'y';
+			const sign = {...prevSign, [axis]: -1 * prevSign[axis]};
+			const delta = Math.random() / 4 + 0.1;
+			const t = Math.ceil(400 / delta);
+			
+			return {
+				sign,
+				axis,
+				delta,
+				t
+			};
+		};
+
+		let moveParams = genMoveParams();
+		let i = 0;
+
+		function animate(timestamp) {
+			uniforms.iTime.value = timestamp / 1000;
+			composer.render();
+
+			if (i === moveParams.t) {
+				i = 0;
+				moveParams = genMoveParams(moveParams.sign);
+			}
+
+			i++;
+
+			camera.position[moveParams.axis] += moveParams.sign[moveParams.axis] * moveParams.delta;
+			camera.updateMatrixWorld();
+
+			requestAnimationFrameID = requestAnimationFrame(animate);
+		}
+
+		animate();
+	});
+
+	onDestroy(() => {
+		window.cancelAnimationFrame(requestAnimationFrameID);
+		windowSizeUnsub();
+		actualUnsub();
+	});
 </script>
 
-<main>
+<main bind:this={mainNode}>
 	{#if $actual}
 	<div class="count">
 		<div class="crown-container">
@@ -25,6 +91,8 @@
 
 <style>
 	main {
+		position: relative;
+
 		display: flex;
 		justify-content: flex-end;
 		align-items: flex-end;
@@ -44,13 +112,25 @@
 	}
 
 	.placeholder {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+
 		padding: 2vmin;
+		margin: 1vmin;
+
+		background-color: #000000cc;
+		border-radius: 5px;
 
 		font-size: 10vmin;
 		color: #eeeeee;
 	}
 
 	.count {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+
 		display: grid;
 
 		grid-column-gap: 4vmin;
@@ -64,6 +144,10 @@
 		color: #eeeeee;
 
 		padding: 2vmin;
+		margin: 1vmin;
+
+		background-color: #000000cc;
+		border-radius: 5px;
 	}
 
 	.crown-container {
