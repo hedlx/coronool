@@ -15,14 +15,6 @@ const makeLastValues = field => derived(
     $data => $data[field]
         .reverse()
         .slice(0, 2)
-        .map((x, i) => {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-
-            const ts = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-
-            return [ts, x];
-        })
 );
 
 const calcRate = values => {

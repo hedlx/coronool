@@ -26,17 +26,39 @@ const extractData = (html: string): object => {
         })
         .filter((x): x is [string, string] => !!x[0])
         .map(([k, x]) => {
-            const matched = x.match(/data:\s*\[[^\]]+\]?/);
+            const matchedData = x.match(/data:\s*\[[^\]]+\]?/);
+            const matchedDays = x.match(/categories:\s*\[[^\]]+\]?/);
+            const rawData = (matchedData && matchedData[0]) || '';
+            const rawDays = (matchedDays && matchedDays[0]) || '';
 
-            return [k, (matched && matched[0]) || ''];
-        })
-        .map(([k, x]) => {
-            const matched = x.match(/\[.*\]/);
-    
-            return [k, matched && JSON.parse(matched[0])]
+            const data = rawData.match(/\[.*\]/);
+            const days = rawDays.match(/\[.*\]/);
+
+            const mapping = Map([
+                ['Jan', 0],
+                ['Feb', 1],
+                ['Mar', 2],
+                ['Apr', 3],
+                ['May', 4],
+                ['Jun', 5],
+                ['Jul', 6],
+                ['Aug', 7],
+                ['Sep', 8],
+                ['Oct', 9],
+                ['Nov', 10],
+                ['Dec', 11]
+            ]);
+
+            const jsData = (data && JSON.parse(data[0])) || [];
+            const jsDays = ((days && JSON.parse(days[0])) || [])
+                .map(x => x.split(' '))
+                .map(([month, day]) => Date.UTC(2020, mapping.get(month)!, Number(day)));
+
+
+            return [k, zip(jsDays, jsData)];
         });
     const {total, deaths, infected} = fromPairs(entries);
-    const recovered = zip(total, deaths, infected).map(([x, y, z]) => x - y - z);
+    const recovered = zip(total, deaths, infected).map(([x, y, z]) => [x[0], x[1] - y[1] - z[1]]);
 
     return {
         total,
