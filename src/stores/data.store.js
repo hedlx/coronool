@@ -1,23 +1,8 @@
 import {derived, readable} from 'svelte/store';
 
-const apiURL = "https://services1.arcgis.com/0MSEUqKaxRlEPj5g/arcgis/rest/services/cases_time_v3/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=Report_Date_String%20desc&outSR=102100&resultOffset=0&resultRecordCount=3&cacheHint=true";
-const deadURL = "https://services9.arcgis.com/N9p5hsImWXAccRNI/arcgis/rest/services/Z7biAeD8PAkqgmWhxG2A/FeatureServer/1/query?f=json&where=Confirmed%20%3E%200&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&outStatistics=%5B%7B%22statisticType%22%3A%22sum%22%2C%22onStatisticField%22%3A%22Deaths%22%2C%22outStatisticFieldName%22%3A%22value%22%7D%5D&outSR=102100&cacheHint=true"
 
-const data = readable({features: []}, async set => {
-    const response = await fetch(apiURL, {
-        "credentials": "omit",
-        "headers": {
-            "accept": "*/*",
-            "accept-language": "en-US,en;q=0.9,ru;q=0.8",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site"
-        },
-        "referrer": "https://www.arcgis.com/apps/opsdashboard/index.html",
-        "referrerPolicy": "no-referrer-when-downgrade",
-        "method": "GET",
-        "mode": "cors"
-    });
+const data = readable({total: [], recovered: [], dead: []}, async set => {
+    const response = await fetch(window.location.origin + '/api/get.data');
     const data = await response.json();
 
     set(data);
@@ -27,14 +12,21 @@ const data = readable({features: []}, async set => {
 
 const makeLastValues = field => derived(
     data,
-    $data => $data
-        .features
-        .map(x => x.attributes)
-        .map(x => [x['Report_Date'], x[field]])
+    $data => $data[field]
+        .reverse()
+        .slice(0, 2)
+        .map((x, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+
+            const ts = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+
+            return [ts, x];
+        })
 );
 
 const calcRate = values => {
-    const [, p, pp] = values;
+    const [p, pp] = values;
 
     if (!p || !pp) {
         return;
@@ -94,7 +86,7 @@ const calcTargetValue = (rate, lastVals, set) => {
     };
 };
 
-const lastTotals = makeLastValues('Total_Confirmed');
+const lastTotals = makeLastValues('total');
 const totalRate = derived(
     lastTotals,
     $totals => calcRate($totals)
@@ -105,7 +97,7 @@ export const total = derived(
     ([$totalRate, $lastTotals], set) => calcTargetValue($totalRate, $lastTotals, set)
 );
 
-const lastRecovereds = makeLastValues('Total_Recovered');
+const lastRecovereds = makeLastValues('recovered');
 const recoveredRate = derived(
     lastRecovereds,
     $lastRecovereds => calcRate($lastRecovereds)
@@ -116,27 +108,17 @@ export const recovered = derived(
     ([$recoveredRate, $lastRecovereds], set) => calcTargetValue($recoveredRate, $lastRecovereds, set)
 );
 
-export const dead = readable(null, async set => {
-    const response = await fetch(
-        deadURL,
-        {
-            "credentials": "omit",
-            "headers": {
-                "accept": "*/*",
-                "accept-language": "en-US,en;q=0.9,ru;q=0.8",
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "same-site"
-            },
-            "referrer": "https://gisanddata.maps.arcgis.com/apps/opsdashboard/index.html",
-            "referrerPolicy": "no-referrer-when-downgrade",
-            "mode":"cors"
-        });
 
-    const data = await response.json();
+const lastDeaths = makeLastValues('dead');
+const deathRate = derived(
+    lastDeaths,
+    $lastDeaths => calcRate($lastDeaths)
+);
 
-    set(data.features[0].attributes.value)
-});
+export const dead = derived(
+    [deathRate, lastDeaths],
+    ([$deathRate, $lastDeaths], set) => calcTargetValue($deathRate, $lastDeaths, set)
+);
 
 export const actual = derived(
     [total, recovered, dead],

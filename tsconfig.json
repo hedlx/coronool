@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "strictNullChecks": true,
+        "target": "es6",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "allowJs": true
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
