@@ -196,6 +196,7 @@
 		grid-column: 2;
 
 		height: 0.3vmin;
+		min-height: 1px;
 		width: 100%;
 
 		background-color: #eeeeee;
