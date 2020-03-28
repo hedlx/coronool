@@ -52,7 +52,7 @@ const extractData = (html: string): object => {
             const jsData = (data && JSON.parse(data[0])) || [];
             const jsDays = ((days && JSON.parse(days[0])) || [])
                 .map(x => x.split(' '))
-                .map(([month, day]) => Date.UTC(2020, mapping.get(month)!, Number(day)));
+                .map(([month, day]) => Date.UTC(2020, mapping.get(month)!, Number(day) + 1));
 
 
             return [k, zip(jsDays, jsData)];
