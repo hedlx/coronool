@@ -1,5 +1,5 @@
 import {
-	OrthographicCamera,
+    OrthographicCamera,
 	PlaneBufferGeometry,
 	Mesh
 } from 'three';
@@ -17,10 +17,8 @@ class Pass {
 
 Pass.FullScreenQuad = class {
     constructor(material) {
-        material.generateMipmaps = false;
-        material.anisotropy = 16;
         this._mesh = new Mesh(new PlaneBufferGeometry(2, 2), material);
-        this._camera = new OrthographicCamera(-1, 1, 1, -1, 0, 2000);
+        this._camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
     }
 
     get material() {

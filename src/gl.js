@@ -1,6 +1,6 @@
 import * as three from 'three';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 
+import EffectComposer from './three/effect.composer';
 import RenderPass from './three/render.pass';
 import GlitchPass from './three/glitch.pass';
 import LightPass from './three/light.pass';

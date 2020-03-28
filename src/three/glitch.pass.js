@@ -9,7 +9,7 @@ import {
 import _ from 'lodash';
 
 import Pass from './pass';
-import { DigitalGlitch } from 'three/examples/jsm/shaders/DigitalGlitch';
+import DigitalGlitch from './shaders/glitch.shader';
 
 
 export default class extends Pass {
@@ -48,20 +48,20 @@ export default class extends Pass {
 
         if (this.triggered) {
             if (this.curF % this.randX == 0) {
-                this.uniforms[ 'amount' ].value = Math.random() / 30;
-                this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI );
-                this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - 1, 1 );
-                this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - 1, 1 );
-                this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, 1 );
-                this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, 1 );
+                this.uniforms['amount'].value = Math.random() / 30;
+                this.uniforms['angle'].value = MathUtils.randFloat(-Math.PI, Math.PI);
+                this.uniforms['seed_x'].value = MathUtils.randFloat(-1, 1);
+                this.uniforms['seed_y'].value = MathUtils.randFloat(-1, 1);
+                this.uniforms['distortion_x'].value = MathUtils.randFloat(0, 1);
+                this.uniforms['distortion_y'].value = MathUtils.randFloat(0, 1);
                 this.curF = 0;
             } else {
-                this.uniforms[ 'amount' ].value = Math.random() / 90;
-                this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI );
-                this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, 1 );
-                this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, 1 );
-                this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - 0.3, 0.3 );
-                this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - 0.3, 0.3 );
+                this.uniforms['amount'].value = Math.random() / 90;
+                this.uniforms['angle'].value = MathUtils.randFloat(-Math.PI, Math.PI);
+                this.uniforms['distortion_x'].value = MathUtils.randFloat(0, 1);
+                this.uniforms['distortion_y'].value = MathUtils.randFloat(0, 1);
+                this.uniforms['seed_x'].value = MathUtils.randFloat(-0.3, 0.3);
+                this.uniforms['seed_y'].value = MathUtils.randFloat(-0.3, 0.3);
             }
 
             this.curF++;
@@ -88,14 +88,14 @@ export default class extends Pass {
     }
     
 	generateHeightmap(dt_size) {
-		const data_arr = new Float32Array( dt_size * dt_size * 3 );
+		const data_arr = new Float32Array(dt_size * dt_size * 3);
 		const length = dt_size * dt_size;
 
 		for (let i = 0; i < length; i++) {
-			var val = MathUtils.randFloat( 0, 1 );
-			data_arr[ i * 3 + 0 ] = val;
-			data_arr[ i * 3 + 1 ] = val;
-			data_arr[ i * 3 + 2 ] = val;
+			var val = MathUtils.randFloat(0, 1);
+			data_arr[i * 3 + 0] = val;
+			data_arr[i * 3 + 1] = val;
+			data_arr[i * 3 + 2] = val;
 		}
 
 		return new DataTexture(data_arr, dt_size, dt_size, RGBFormat, FloatType);

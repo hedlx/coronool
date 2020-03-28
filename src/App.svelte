@@ -12,6 +12,7 @@
 		camera.aspect = width / height;
 		camera.updateProjectionMatrix();
 		renderer.setSize(width, height);
+		composer.setSize(width, height);
 	});
 	const actualUnsub = actual.subscribe(value => {
 		if (value) {
