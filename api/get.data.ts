@@ -51,12 +51,14 @@ const extractData = (html: string): object => {
 
             const jsData = (data && JSON.parse(data[0])) || [];
             const jsDays = ((days && JSON.parse(days[0])) || [])
-                .map(x => x.split(' '))
-                .map(([month, day]) => Date.UTC(2020, mapping.get(month)!, Number(day) + 1));
-
+                .map(x => x.split(', '))
+                .map(([date, year]) => [...date.split(' '), year])
+                .map(([month, day, year]) => Date.UTC(Number(year), mapping.get(month)!, Number(day) + 1));
 
             return [k, zip(jsDays, jsData)];
-        });
+        })
+        .filter(([, xs]) => xs.length > 0);
+
     const {total, deaths, infected} = fromPairs(entries);
     const recovered = zip(total, deaths, infected).map(([x, y, z]) => [x[0], x[1] - y[1] - z[1]]);
 
