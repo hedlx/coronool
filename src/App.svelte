@@ -141,7 +141,7 @@
 		align-self: flex-end;
 		justify-self: flex-end;
 
-		font-size: 14vmin;
+		font-size: 10vmin;
 		color: #eeeeee;
 
 		padding: 2vmin;
