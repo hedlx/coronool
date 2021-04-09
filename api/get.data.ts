@@ -9,7 +9,7 @@ const extractData = (html: string): object => {
     const $ = cheerio.load(html);
     const res: string[] = [];
     const necessaryTitles = Map([
-        ['Total Coronavirus Cases', 'total'],
+        ['Total Cases', 'total'],
         ['Total Deaths', 'deaths'],
         ['Currently Infected', 'infected']
     ]);
