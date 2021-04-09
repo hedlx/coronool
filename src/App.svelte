@@ -1,7 +1,6 @@
 <script>
 	import {onMount, onDestroy} from 'svelte';
 	import _ from 'lodash';
-	import * as three from 'three';
 	import {total, recovered, dead, actual} from "./stores/data.store";
 	import {windowSize} from './stores/common.store';
 	import {renderer, composer, camera, triggerGlitch, uniforms} from './gl';
@@ -14,7 +13,7 @@
 		renderer.setSize(width, height);
 		composer.setSize(width, height);
 	});
-	const actualUnsub = actual.subscribe(value => {
+	const deadUnsub = dead.subscribe(value => {
 		if (value) {
 			triggerGlitch();
 		}
@@ -65,7 +64,7 @@
 	onDestroy(() => {
 		window.cancelAnimationFrame(requestAnimationFrameID);
 		windowSizeUnsub();
-		actualUnsub();
+		deadUnsub();
 	});
 </script>
 
